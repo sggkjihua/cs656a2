@@ -26,7 +26,6 @@ public class Packet implements Serializable{
     }
 
     public void stopWaiting(){
-        // 一旦检查正确了或者前面已经有的fail了的话就需要让这个计时器停止
         correctUpToNow = false;
     }
 
