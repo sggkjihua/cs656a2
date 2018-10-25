@@ -17,6 +17,7 @@ public class Sender{
     public static TasksLinkedList linkedlist;
     private static int windowSize = 10;
     private static Boolean complete = false;
+    private static DatagramSocket ds;
 
 
     static Integer send_port;            // on which the emulator receive data from sender
@@ -27,15 +28,17 @@ public class Sender{
 
     public static void main(String args[])throws IOException {
         linkedlist = new TasksLinkedList();
-            emulator_addr = InetAddress.getByName(args[0]);
-            send_port = Integer.parseInt(args[1]);
-            receive_port = Integer.parseInt(args[2]);
-            file_name = args[3];
-            try{
-            SenderUDP senderUDP = new SenderUDP(emulator_addr,send_port,windowSize);
-            TimerReceive receiver = new TimerReceive(receive_port);
-            senderUDP.run();
-            receiver.run();
+        emulator_addr = InetAddress.getByName(args[0]);
+        send_port = Integer.parseInt(args[1]);
+        receive_port = Integer.parseInt(args[2]);
+        file_name = args[3];
+        try{
+            ds = new DatagramSocket(receive_port);
+            SenderUDP senderUDP = new SenderUDP(emulator_addr,send_port,windowSize,ds);
+            TimerReceive receiver = new TimerReceive();
+            new Thread(receiver).start();
+            new Thread(senderUDP).start();
+
             } catch (Exception e){
                 e.printStackTrace();
             }
@@ -51,15 +54,23 @@ public class Sender{
     public static void moveToNextSeq(){
         if(expected_Sequence < Sequence-1){
             expected_Sequence = expected_Sequence + 1;
+        }else{
+            complete = true;
         }
     }
 
     public static void addCurrSeq(){
+        if(curr_Sequence < Sequence - 1){
         curr_Sequence = curr_Sequence + 1;
+        }
     }
 
     public static Boolean getComplete(){
         return complete;
+    }
+
+    public static DatagramSocket getDs(){
+        return ds;
     }
 }
 
@@ -74,27 +85,27 @@ class SenderUDP implements Runnable{
     private DatagramSocket ds;
     private Boolean complete = false;
 
-    public SenderUDP(InetAddress emulator_addr, int send_port, int windowSize) throws IOException{
+    public SenderUDP(InetAddress emulator_addr, int send_port, int windowSize, DatagramSocket datagramSocket){
         this.emulator_addr = emulator_addr;
         this.send_port = send_port;
         this.windowSize = windowSize;
-        this.ds =  new DatagramSocket(send_port);
+        this.ds =  datagramSocket;
     }
 
     @Override
     public void run(){
-        while(!complete){
-            try{
+        while(!Sender.getComplete()){
             sendPackage();
-        }catch (IOException e) {
-                e.printStackTrace();            }
-        }
+            System.out.println("!!");
+         }
+        System.out.println("I am not supposed to come here");
         ds.close();
     }
 
-    public void sendPackage() throws IOException{
-        while((Sender.curr_Sequence - Sender.expected_Sequence) < windowSize-1){
-            // check if it is still available to send package within window size
+    public void sendPackage(){
+       if((Sender.curr_Sequence - Sender.expected_Sequence) < windowSize-1){
+
+           try{// check if it is still available to send package within window size
             String test_str = "This is only for testing";
             Packet packet = new Packet(0,Sender.curr_Sequence,test_str.length(),test_str);
             ByteArrayOutputStream bout=new ByteArrayOutputStream();
@@ -105,7 +116,9 @@ class SenderUDP implements Runnable{
             DatagramPacket data_sent= new DatagramPacket(sendBuff,sendBuff.length,emulator_addr,send_port);
             ds.send(data_sent);
             Sender.addCurrSeq();
-            System.out.println("The current seq number is:"+ Sender.curr_Sequence);
+            System.out.println("The current seq number is:"+ Sender.curr_Sequence);}catch (IOException e){
+               e.printStackTrace();
+           }
         }
     }
 }

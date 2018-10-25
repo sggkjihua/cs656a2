@@ -24,7 +24,7 @@ public class ReceiverTest {
         file_name = args[3];
 
         buf = new byte[500];
-        ds = new DatagramSocket(send_port);
+        ds = new DatagramSocket(receive_port);
         dp_receive = new DatagramPacket(buf, 500);
         dp_send = new DatagramPacket(buf,500);
         while (true) {
@@ -39,6 +39,7 @@ public class ReceiverTest {
             ObjectInputStream oin = new ObjectInputStream(bin);
             Packet packet = (Packet) oin.readObject();
             receive_Seq = packet.getSeqnum();
+            System.out.println("SeqNum received is "+receive_Seq);
             response(receive_Seq);
             dp_receive.setLength(500);
         }catch (Exception e){
@@ -57,6 +58,5 @@ public class ReceiverTest {
         byte[] sendBuff=bout.toByteArray();
         dp_send= new DatagramPacket(sendBuff,sendBuff.length,emulator_addr,send_port);
         ds.send(dp_send);
-
     }
 }

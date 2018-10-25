@@ -34,7 +34,7 @@ public class Packet implements Serializable{
         @Override
         public void run() {
             // once it is time out, it should move the current Seq to the expected Seq
-            if (correctUpToNow) {
+            if (!correctUpToNow) {
                 Sender.moveBackExpectedSeq();
             }
         }

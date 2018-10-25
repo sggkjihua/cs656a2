@@ -6,26 +6,27 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class TimerReceive implements Runnable{
-    private int receive_port;
     private DatagramSocket ds;
     private int receive_Seq;
     private byte[] buf;
     private DatagramPacket dp_receive;
 
-    public TimerReceive(int receive_port) throws Exception {
-        this.receive_port = receive_port;
+    public TimerReceive(){
         buf = new byte[500];
-        ds = new DatagramSocket(receive_port);
+        ds = Sender.getDs();
         dp_receive = new DatagramPacket(buf, 500);
     }
 
     public void receive(){
+
         try {
+            //System.out.println("I am trying to receive somthing");
             ds.receive(dp_receive);
             ByteArrayInputStream bin = new ByteArrayInputStream(dp_receive.getData());
             ObjectInputStream oin = new ObjectInputStream(bin);
             Packet packet = (Packet) oin.readObject();
             receive_Seq = packet.getSeqnum();
+            System.out.println("SeqNum received is "+receive_Seq +" Expected is "+Sender.expected_Sequence);
             if(!compare(receive_Seq,Sender.expected_Sequence)){
                 Sender.moveBackExpectedSeq();
 
@@ -34,7 +35,7 @@ public class TimerReceive implements Runnable{
             }
             dp_receive.setLength(500);
         }catch (Exception e){
-            System.out.println("Unknown Exception");
+            System.out.println("Unknown Exception2222");
         }
     }
 
@@ -44,12 +45,8 @@ public class TimerReceive implements Runnable{
 
     @Override
     public void run() {
-        while(!Sender.getComplete()){
-            try{
-                receive();
-            }catch (Exception e){
-                e.printStackTrace();
-            }
+        while(!Sender.getComplete()) {
+            receive();
         }
     }
 }
