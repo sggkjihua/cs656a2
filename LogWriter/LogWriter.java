@@ -1,6 +1,7 @@
 package LogWriter;
 import java.io.*;
 import java.util.ArrayList;
+
 public class LogWriter {
     public void writeFile(String fileName, ArrayList<Integer> SeqNums) throws IOException {
         File fout = new File(fileName);
