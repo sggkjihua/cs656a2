@@ -1,7 +1,5 @@
 package Sender;
 
-import Packet.packet;
-
 import javax.management.timer.Timer;
 import javax.management.timer.TimerMBean;
 import java.net.DatagramPacket;
