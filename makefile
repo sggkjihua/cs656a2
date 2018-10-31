@@ -9,7 +9,7 @@
 JAR_PKG = asgn2.jar
 # 设置你的项目的入口点
 # Set your entry point of your java app:
-ENTRY_POINT = Sender
+ENTRY_POINT = Sender.Sender
 # 是否需要res目录，如果你的程序有图片、文档等，
 # 最好放入res目录中。
 # yes: 需要；no：不需要
@@ -23,11 +23,9 @@ RES_DIR = no
 # 建议一行一个。
 # 另外注意顺序，如果class A 引用 class B，那么B.java应该放在A.java前。
 SOURCE_FILES = \
-Sender.java \
-Packet.java \
-TasksLinkedList.java \
-TimerReceive.java\
-ReceiverTest.java
+*.java\
+Sender/*.java \
+Receiver/*.java \
 
 # 设置你的java编译器
 # Set your java compiler here:
